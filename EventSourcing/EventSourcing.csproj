@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AddedDrug.cs" />
+    <Compile Remove="AddedRecord.cs" />
+    <Compile Remove="Drug.cs" />
+    <Compile Remove="Regiemn.Apply.cs" />
+    <Compile Remove="Regimen.cs" />
+    <Compile Remove="RemovedDrug.cs" />
+    <Compile Remove="UpdatedDrug.cs" />
+  </ItemGroup>
+
+</Project>
