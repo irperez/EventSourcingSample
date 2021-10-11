@@ -4,11 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
 namespace EventSourcing
 {
-
     public class InMemoryEventStore : IEventStore
     {
         public InMemoryEventStore()
@@ -17,7 +14,7 @@ namespace EventSourcing
         }
 
         private const string Apply = "Apply";
-        private readonly IList<ISnapshot> snapshots = new List<ISnapshot>();
+        public readonly IList<ISnapshot> snapshots = new List<ISnapshot>();
         public List<Event> Events { get; private set; }
 
         public void Init()
@@ -43,6 +40,18 @@ namespace EventSourcing
 
             snapshots
                 .FirstOrDefault(snapshot => snapshot.Handles == typeof(TStream))?
+                .Handle(aggregate);
+
+            return true;
+        }
+
+        public bool CreateSnapshot<T>(Guid entityId, ulong version) where T : notnull, IAggregate<Guid>
+        {
+            //TODO Add applying events for all projections
+            var aggregate = AggregateStream<T>(entityId, version);
+
+            snapshots
+                .FirstOrDefault(snapshot => snapshot.Handles == typeof(T))?
                 .Handle(aggregate);
 
             return true;
@@ -84,17 +93,17 @@ namespace EventSourcing
             return Events.Where(ev => ev.EntityId == entityId).OrderBy(ev => ev.Version).Select(ev => ev.Data).ToList();
         }
 
-        public T AggregateStream<T>(Guid entityId, long? atStreamVersion = null, DateTime? atTimestamp = null) where T : notnull
+        public T AggregateStream<T>(Guid entityId, ulong? atStreamVersion = null, DateTime? atTimestamp = null) where T : notnull
         {
             var aggregate = (T)Activator.CreateInstance(typeof(T), true)!;
 
             var events = GetEvents(entityId);
-            var version = 0;
+            ulong version = 0;
 
             foreach (var @event in events)
             {                
                 aggregate.InvokeIfExists(Apply, @event);
-                aggregate.SetIfExists(nameof(IAggregate.Version), (ulong)++version);
+                aggregate.SetIfExists(nameof(IAggregate.Version), ++version);
             }
 
             return aggregate;

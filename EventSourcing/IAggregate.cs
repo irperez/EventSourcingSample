@@ -45,7 +45,7 @@ namespace EventSourcing
             uncommittedEvents.Enqueue(@event);
         }
         
-        //public virtual void When(IEventData @event) { }        
+        public virtual void When(IEventData @event) { }        
     }
 
 }

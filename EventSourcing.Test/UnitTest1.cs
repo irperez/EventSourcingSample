@@ -21,7 +21,7 @@ namespace EventSourcing.Test
             var entityId = Guid.NewGuid();
 
             // Create an "AddedRecorded" event
-            var newEvent = new AddedRecord() { Id = Guid.NewGuid(), Name = "Ivan", Value = 42 };
+            var newEvent = new AddedRecord() { Id = entityId, Name = "Ivan", Value = 42 };
 
             // Add event to Event Store.
             memStore.AppendEvent<Regimen>(entityId, newEvent);
@@ -39,6 +39,7 @@ namespace EventSourcing.Test
             var actual = memStore.AggregateStream<Regimen>(entityId);
 
             // Validate
+            Assert.AreEqual(newEvent.Id, actual.Id);
             Assert.AreEqual(newEvent.Name, actual.Name);
             Assert.AreEqual(newEvent.Value, actual.Value);
 
@@ -80,6 +81,15 @@ namespace EventSourcing.Test
 
             // Materialize Regimen object after all the looping.
             var finalRegimen = memStore.AggregateStream<Regimen>(entityId);
+
+
+            var result = memStore.CreateSnapshot<Regimen>(entityId, 3);
+            Assert.AreEqual(1, memStore.snapshots.Count);
+            var snapshotStore = (InMemorySnapshotStore<Regimen>)memStore.snapshots[0];
+            Assert.AreNotSame(actual, finalRegimen);
+            Assert.AreEqual(1, snapshotStore.SnapshotData.Count);
+            Assert.AreEqual(entityId, snapshotStore.SnapshotData[entityId][0].Id);
+
         }
     }
 
