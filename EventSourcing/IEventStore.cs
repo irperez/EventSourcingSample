@@ -8,7 +8,9 @@ namespace EventSourcing
     {
         void Init();
 
-        bool AppendEvent<TStream>(Guid EntityId, IEventData @event, long? expectedVersion = null);
+        bool AppendEvent<TStream>(Guid EntityId, IEventData @event, ulong? expectedVersion = null);
+
+        
     }
 
 }

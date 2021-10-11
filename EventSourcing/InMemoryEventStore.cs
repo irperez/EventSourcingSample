@@ -34,7 +34,7 @@ namespace EventSourcing
         {
             //TODO Add applying events for all projections
             var events = aggregate.DequeueUncommittedEvents();
-            var initialVersion = aggregate.Version - events.Count();
+            var initialVersion = aggregate.Version - (ulong)events.Count();
 
             foreach (var @event in events)
             {
@@ -49,7 +49,7 @@ namespace EventSourcing
         }
 
 
-        public bool AppendEvent<TStream>(Guid entityId, IEventData @event, long? expectedVersion = null)
+        public bool AppendEvent<TStream>(Guid entityId, IEventData @event, ulong? expectedVersion = null)
         {
             if (Events.Exists(ev => ev.EntityId == entityId && ev.Version == expectedVersion))
             {
@@ -94,7 +94,7 @@ namespace EventSourcing
             foreach (var @event in events)
             {                
                 aggregate.InvokeIfExists(Apply, @event);
-                aggregate.SetIfExists(nameof(IAggregate.Version), ++version);
+                aggregate.SetIfExists(nameof(IAggregate.Version), (ulong)++version);
             }
 
             return aggregate;

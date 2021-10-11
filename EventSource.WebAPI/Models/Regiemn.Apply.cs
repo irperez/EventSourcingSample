@@ -11,14 +11,7 @@ namespace EventSourcing
     {
         [JsonIgnore]
         private readonly List<object> uncommittedEvents = new List<object>();
-        IEnumerable<object> DequeueUncommittedEvents()
-        {
-            var dequeuedEvents = uncommittedEvents.ToList();
-
-            uncommittedEvents.Clear();
-
-            return dequeuedEvents;
-        }
+        
 
         protected void Enqueue(object @event)
         {

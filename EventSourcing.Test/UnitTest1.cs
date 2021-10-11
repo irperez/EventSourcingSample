@@ -15,6 +15,7 @@ namespace EventSourcing.Test
             // Create Event Store
             var memStore = new InMemoryEventStore();
             memStore.Init();
+            memStore.AddSnapshot(new InMemorySnapshotStore<Regimen>());
 
             // Generate Entity ID Used to find in Entity Store
             var entityId = Guid.NewGuid();
@@ -30,7 +31,7 @@ namespace EventSourcing.Test
             Assert.AreSame(newEvent, memStore.Events[0].Data);
             Assert.AreNotEqual(Guid.Empty, memStore.Events[0].Id);
             Assert.AreEqual(memStore.Events[0].StreamType, memStore.Events[0].PartitionKey);
-            Assert.AreEqual(0, memStore.Events[0].Version);
+            Assert.AreEqual<ulong>(0, memStore.Events[0].Version);
             Assert.AreEqual("EventSourcing.AddedRecord", memStore.Events[0].Type);
             Assert.AreEqual(entityId, memStore.Events[0].EntityId);
 
@@ -61,7 +62,7 @@ namespace EventSourcing.Test
             Assert.AreEqual(updateDrug.GenericId, actual3.Drugs[0].GenericId);
 
             // Check Version
-            Assert.AreEqual(3, actual3.Version);
+            Assert.AreEqual<ulong>(3, actual3.Version);
 
 
             for(int i = 0; i < 1000; i++)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,13 @@ namespace EventSource.WebAPI.Controllers
     [ApiController]
     public class RegimenController : ControllerBase
     {
+        public RegimenController(ILogger<RegimenController> logger)
+        {
+            _logger = logger;
+        }
+
+        private readonly ILogger<RegimenController> _logger;
+
         // GET: api/<RegimenController>
         [HttpGet]
         public IEnumerable<string> Get()
