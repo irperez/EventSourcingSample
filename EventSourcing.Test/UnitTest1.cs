@@ -102,12 +102,4 @@ namespace EventSourcing.Test
         }
     }
 
-    
-
-    public class UnitTestStore : InMemoryEventStore
-    {
-
-    }
-
-    
 }
