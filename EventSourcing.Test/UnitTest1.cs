@@ -1,3 +1,4 @@
+using EventSource.WebAPI.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Runtime.CompilerServices;
@@ -16,6 +17,7 @@ namespace EventSourcing.Test
             var memStore = new InMemoryEventStore();
             memStore.Init();
             memStore.AddSnapshot(new InMemorySnapshotStore<Regimen>());
+            memStore.AddProjectionHandler(new InMemoryProjectionStore<RegimenIndex>());
 
             // Generate Entity ID Used to find in Entity Store
             var entityId = Guid.NewGuid();
@@ -82,7 +84,7 @@ namespace EventSourcing.Test
             // Materialize Regimen object after all the looping.
             var finalRegimen = memStore.AggregateStream<Regimen>(entityId);
 
-
+            // Materialize a Snapshot of the Regimen object
             var result = memStore.CreateSnapshot<Regimen>(entityId, 3);
             Assert.AreEqual(1, memStore.snapshots.Count);
             var snapshotStore = (InMemorySnapshotStore<Regimen>)memStore.snapshots[0];
@@ -90,6 +92,13 @@ namespace EventSourcing.Test
             Assert.AreEqual(1, snapshotStore.SnapshotData.Count);
             Assert.AreEqual(entityId, snapshotStore.SnapshotData[entityId][0].Id);
 
+            // Materialize a Projection
+            var resultProjection = memStore.CreateProjection<RegimenIndex>(entityId, 3);
+            Assert.AreEqual(1, memStore.projections.Count);
+            var projectionStore = (InMemoryProjectionStore<RegimenIndex>)memStore.projections[0];
+            Assert.AreNotSame(actual, finalRegimen);
+            Assert.AreEqual(1, projectionStore.ProjectionData.Count);
+            Assert.AreEqual(entityId, projectionStore.ProjectionData[entityId][0].Id);
         }
     }
 

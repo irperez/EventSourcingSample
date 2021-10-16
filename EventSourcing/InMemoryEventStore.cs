@@ -14,7 +14,8 @@ namespace EventSourcing
         }
 
         private const string Apply = "Apply";
-        public readonly IList<ISnapshot> snapshots = new List<ISnapshot>();
+        public readonly List<ISnapshot> snapshots = new();
+        public readonly List<IProjectionHandler> projections = new();
         public List<Event> Events { get; private set; }
 
         public void Init()
@@ -25,6 +26,11 @@ namespace EventSourcing
         public void AddSnapshot(ISnapshot snapshot)
         {
             snapshots.Add(snapshot);
+        }
+
+        public void AddProjectionHandler(IProjectionHandler projectionHandler)
+        {
+            projections.Add(projectionHandler);
         }
 
         public bool Store<TStream>(TStream aggregate) where TStream : IAggregate
@@ -53,6 +59,18 @@ namespace EventSourcing
             snapshots
                 .FirstOrDefault(snapshot => snapshot.Handles == typeof(T))?
                 .Handle(aggregate);
+
+            return true;
+        }
+
+        public bool CreateProjection<T>(Guid entityId, ulong version) where T : notnull, IAggregate<Guid>
+        {
+            //TODO Add applying events for all projections
+            var newProjection = AggregateStream<T>(entityId, version);
+
+            projections
+                .FirstOrDefault(projection => projection.Handles == typeof(T))?
+                .Handle(newProjection);
 
             return true;
         }
